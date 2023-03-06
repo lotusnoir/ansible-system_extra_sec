@@ -84,17 +84,6 @@
 #    - /etc/cron.deny
 #    - /etc/at.deny
 #
-#- name: "Delete old module"
-#  community.general.modprobe:
-#    name: "{{ item }}"
-#    state: absent
-#  with_items:
-#    - hfs
-#    - hfsplus
-#    - vfat
-#    - usb-storage
-#
-#
 #- name: "/etc/security/pwquality.conf"
 #  lineinfile:
 #    path: /etc/security/pwquality.conf
@@ -107,53 +96,64 @@
 #    - ucredit = -1
 #    - ocredit = -1
 #    - lcredit = -1
-#
-#- name: "change grub"
-#  lineinfile:
-#    path: /etc/default/grub
-#    regexp: "^GRUB_CMDLINE_LINUX=\"\""
-#    line: "GRUB_CMDLINE_LINUX=\"audit=1 ipv6.disable=1\""
-#    state: present
-#  register: grub
-#
-#- name: update-grub
-#  shell: update-grub
-#  when: grub.changed
-#
-#- name: "Disable rsyncd"
-#  service:
-#    name: "rsync"
-#    state: stopped
-#    enabled: false
+
+###############
+#- name: "Check for logrotate.conf"
+#  ansible.builtin.stat:
+#    path: '/etc/logrotate.conf'
+#  changed_when: false
+#  register: logrotate_file
 #
 #- name: "change log permissions"
 #  lineinfile:
 #    path: /etc/logrotate.conf
 #    regexp: "^create"
-#    line: "create 0640"
+#    line: "create 0600"
 #    state: present
+#  when: logrotate_file.stat.exists
+#
+###############
+#- name: "Check for btmp"
+#  ansible.builtin.stat:
+#    path: /etc/logrotate.d/btmp
+#  changed_when: false
+#  register: btmp_file
 #
 #- name: "change log permissions"
 #  ansible.builtin.replace:
 #    path: /etc/logrotate.d/btmp
 #    regexp: '(\s+)0660(\s+.*)?$'
-#    replace: '\g<1>0640\2'
+#    replace: '\g<1>0600\2'
+#  when: btmp_file.stat.exists
+#
+###############
+#- name: "Check for alternatives"
+#  ansible.builtin.stat:
+#    path: /etc/logrotate.d/alternatives
+#  changed_when: false
+#  register: alternatives_file
 #
 #- name: "change log permissions"
 #  ansible.builtin.replace:
-#    path: "/etc/logrotate.d/{{ item }}"
+#    path: "/etc/logrotate.d/alternatives"
 #    regexp: '(\s+)644(\s+.*)?$'
-#    replace: '\g<1>0640\2'
-#  with_items:
-#    - btmp
-#    - alternatives
+#    replace: '\g<1>0600\2'
+#  when: alternatives_file.stat.exists
+#
+###############
+#- name: "Check for alternatives"
+#  ansible.builtin.stat:
+#    path: /etc/logrotate.d/wtmp
+#  changed_when: false
+#  register: alternatives_file
 #
 #- name: "change log permissions"
 #  ansible.builtin.replace:
 #    path: /etc/logrotate.d/wtmp
 #    regexp: '(\s+)0664(\s+.*)?$'
-#    replace: '\g<1>0640\2'
+#    replace: '\g<1>0600\2'
 
+##############
 - name: "Replace issue content"
   ansible.builtin.copy:
     content: 'Authorized uses only. All activity may be monitored and reported.'
