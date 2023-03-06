@@ -1,0 +1,163 @@
+---
+###
+#Failed to determine supported controllers: No such process
+#Failed to allocate manager object: No such process
+#user@1831700500.service: Main process exited, code=exited, status=1/FAILURE
+#user@1831700500.service: Failed with result 'exit-code'.
+#Failed to start User Manager for UID 1831700500.
+#
+#- name: Configure group for reading other processes
+#  group:
+#    state: present
+#    name: proc
+#    system: yes
+#
+#- name: Ensure configuration directory for whitelisted services exist
+#  file:
+#    state: directory
+#    path: "/etc/systemd/system/{{ item }}.d"
+#    owner: root
+#    group: root
+#    mode: u=rwx,g=rx,o=rx
+#  loop:
+#    - systemd-logind.service
+#    - user@.service
+#
+#- name: Configure whitelisted services to adapt to hidepid setting
+#  copy:
+#    content: |
+#      [Service]
+#      SupplementaryGroups=proc
+#    dest: "/etc/systemd/system/{{ item }}.d/proc_hidepid_whitelist.conf"
+#    owner: root
+#    group: root
+#    mode: u=rw,g=r,o=r
+#  loop:
+#    - systemd-logind.service
+#    - user@.service
+#
+#- meta: end_play
+#
+################################
+
+#- name: "change permissions on files"
+#  file:
+#    path: /etc/group-
+#    owner: root
+#    group: root
+#    mode: "u-x,go-rwx"
+#  with_items:
+#    - /etc/group-
+#    - /etc/passwd-
+#    - /etc/motd
+#
+#- name: "change permissions on files"
+#  file:
+#    path: "{{ item }}"
+#    owner: root
+#    group: root
+#    mode: "0600"
+#  with_items:
+#    - /etc/cron.hourly
+#    - /etc/cron.daily
+#    - /etc/cron.weekly
+#    - /etc/cron.monthly
+#    - /etc/crontab
+#
+#- name: "Create files if not exists"
+#  copy:
+#    content: ""
+#    dest: "{{ item }}"
+#    force: 'no'
+#    owner: root
+#    group: root
+#    mode: "og-rwx"
+#  with_items:
+#    - /etc/cron.allow
+#    - /etc/at.allow
+#
+#- name: "remove files"
+#  file:
+#    path: "{{ item }}"
+#    state: absent
+#  with_items:
+#    - /etc/cron.deny
+#    - /etc/at.deny
+#
+#- name: "Delete old module"
+#  community.general.modprobe:
+#    name: "{{ item }}"
+#    state: absent
+#  with_items:
+#    - hfs
+#    - hfsplus
+#    - vfat
+#    - usb-storage
+#
+#
+#- name: "/etc/security/pwquality.conf"
+#  lineinfile:
+#    path: /etc/security/pwquality.conf
+#    regexp: "^{{ item }}"
+#    line: "{{ item }}"
+#    state: present
+#  with_items:
+#    - minlen = 14
+#    - dcredit = -1
+#    - ucredit = -1
+#    - ocredit = -1
+#    - lcredit = -1
+#
+#- name: "change grub"
+#  lineinfile:
+#    path: /etc/default/grub
+#    regexp: "^GRUB_CMDLINE_LINUX=\"\""
+#    line: "GRUB_CMDLINE_LINUX=\"audit=1 ipv6.disable=1\""
+#    state: present
+#  register: grub
+#
+#- name: update-grub
+#  shell: update-grub
+#  when: grub.changed
+#
+#- name: "Disable rsyncd"
+#  service:
+#    name: "rsync"
+#    state: stopped
+#    enabled: false
+#
+#- name: "change log permissions"
+#  lineinfile:
+#    path: /etc/logrotate.conf
+#    regexp: "^create"
+#    line: "create 0640"
+#    state: present
+#
+#- name: "change log permissions"
+#  ansible.builtin.replace:
+#    path: /etc/logrotate.d/btmp
+#    regexp: '(\s+)0660(\s+.*)?$'
+#    replace: '\g<1>0640\2'
+#
+#- name: "change log permissions"
+#  ansible.builtin.replace:
+#    path: "/etc/logrotate.d/{{ item }}"
+#    regexp: '(\s+)644(\s+.*)?$'
+#    replace: '\g<1>0640\2'
+#  with_items:
+#    - btmp
+#    - alternatives
+#
+#- name: "change log permissions"
+#  ansible.builtin.replace:
+#    path: /etc/logrotate.d/wtmp
+#    regexp: '(\s+)0664(\s+.*)?$'
+#    replace: '\g<1>0640\2'
+
+- name: "Replace issue content"
+  ansible.builtin.copy:
+    content: 'Authorized uses only. All activity may be monitored and reported.'
+    dest: "{{ item }}"
+  with_items:
+    - /etc/issue
+    - /etc/issue.net
