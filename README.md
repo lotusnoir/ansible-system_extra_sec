@@ -1,13 +1,13 @@
 # ansible-system_extra_sec
 
-## Description
-
 [![Galaxy Role](https://img.shields.io/badge/galaxy-system_extra_sec-purple?style=flat)](https://galaxy.ansible.com/lotusnoir/system_extra_sec)
 [![Version](https://img.shields.io/github/release/lotusnoir/ansible-system_extra_sec.svg)](https://github.com/lotusnoir/ansible-system_extra_sec/releases/latest)
 [![GitHub repo size](https://img.shields.io/github/repo-size/lotusnoir/ansible-system_extra_sec?color=orange&style=flat)](https://galaxy.ansible.com/lotusnoir/system_extra_sec)
 [![downloads](https://img.shields.io/ansible/role/d/)](https://galaxy.ansible.com/lotusnoir/system_extra_sec)
 [![Ansible Quality Score](https://img.shields.io/ansible/quality/)](https://galaxy.ansible.com/lotusnoir/system_extra_sec)
 [![License](https://img.shields.io/badge/license-Apache--2.0-brightgreen?style=flat)](https://opensource.org/licenses/Apache-2.0)
+
+## Description
 
 Configures extra sec CIS recommandation not supported by other modules
 ## Requirements
