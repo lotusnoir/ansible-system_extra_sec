@@ -190,6 +190,8 @@
 - name: "Change log permissions"
   ansible.builtin.command: find /var/log -type f -exec chmod g-wx,o-rwx '{}' + -o -type d -exec chmod g-w,o-rwx '{}' +
   changed_when: false
+  failed_when: false
+  when: extra_sec_logs_perms | bool
 
 #- name: 1/2 Add options in /etc/security/pwquality.conf
 #  ansible.builtin.lineinfile:
