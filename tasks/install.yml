@@ -206,3 +206,10 @@
 #    line: minclass = 4
 
 #delete specific user
+
+- name: "Change umask in /etc/init.d/rc"
+  ansible.builtin.lineinfile:
+    path: /etc/init.d/rc
+    regexp: '^umask 022'
+    line: umask 027
+  when: extra_sec_umask_rc | bool
