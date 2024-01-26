@@ -6,3 +6,8 @@ extra_sec_issue_content: "Authorized uses only. All activity may be monitored an
 
 extra_sec_logs_perms: false
 extra_sec_umask_rc: false
+
+
+extra_sec_crontab_allow: false
+extra_sec_crontab_allow_content: |
+  root

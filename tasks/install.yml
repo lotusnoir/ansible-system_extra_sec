@@ -1,4 +1,59 @@
 ---
+- name: "Check for /etc/security/pwquality.conf"
+  ansible.builtin.stat:
+    path: '/etc/security/pwquality.conf'
+  register: pwquality_file
+  changed_when: false
+  when: extra_sec_pwquality_update | bool
+
+- name: "/etc/security/pwquality.conf"
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "^{{ item }}"
+    line: "{{ item }}"
+    state: present
+  with_items:
+    - "minlen = 14"
+    - "minclass = 4"
+  when:
+    - pwquality_file.stat.exists is defined
+    - extra_sec_pwquality_update | bool
+
+- name: "Create crontab.allow if not exists"
+  ansible.builtin.copy:
+    content: "{{ extra_sec_crontab_allow_content }}"
+    dest: "{{ item }}"
+    force: 'no'
+    owner: root
+    group: root
+    mode: "600"
+  with_items:
+    - /etc/cron.allow
+  when: extra_sec_crontab_allow | bool
+
+- name: "Replace issue content"
+  ansible.builtin.copy:
+    content: "{{ extra_sec_issue_content }}"
+    dest: "{{ item }}"
+    mode: "0600"
+  with_items:
+    - /etc/issue
+    - /etc/issue.net
+  when: extra_sec_issue_update | bool
+
+- name: "Change log permissions"
+  ansible.builtin.command: find /var/log -type f -exec chmod g-wx,o-rwx '{}' + -o -type d -exec chmod g-w,o-rwx '{}' +
+  changed_when: false
+  failed_when: false
+  when: extra_sec_logs_perms | bool
+
+- name: "Change umask in /etc/init.d/rc"
+  ansible.builtin.lineinfile:
+    path: /etc/init.d/rc
+    regexp: '^umask 022'
+    line: umask 027
+  when: extra_sec_umask_rc | bool
+
 ###
 # Failed to determine supported controllers: No such process
 # Failed to allocate manager object: No such process
@@ -64,16 +119,6 @@
 #    - /etc/cron.monthly
 #    - /etc/crontab
 #
-#- name: "Create files if not exists"
-#  ansible.builtin.copy:
-#    content: ""
-#    dest: "{{ item }}"
-#    force: 'no'
-#    owner: root
-#    group: root
-#    mode: "og-rwx"
-#  with_items:
-#    - /etc/cron.allow
 #    - /etc/at.allow
 #
 #- name: "remove files"
@@ -84,30 +129,6 @@
 #    - /etc/cron.deny
 #    - /etc/at.deny
 #
-- name: "Check for /etc/security/pwquality.conf"
-  ansible.builtin.stat:
-    path: '/etc/security/pwquality.conf'
-  register: pwquality_file
-  changed_when: false
-  when: extra_sec_pwquality_update | bool
-
-- name: "/etc/security/pwquality.conf"
-  ansible.builtin.lineinfile:
-    path: /etc/security/pwquality.conf
-    regexp: "^{{ item }}"
-    line: "{{ item }}"
-    state: present
-  with_items:
-    - "minlen = 14"
-    - "minclass = 4"
-  when:
-    - pwquality_file.stat.exists is defined
-    - extra_sec_pwquality_update | bool
-#    - dcredit = -1
-#    - ucredit = -1
-#    - ocredit = -1
-#    - lcredit = -1
-
 ###############
 #- name: "Check for logrotate.conf"
 #  ansible.builtin.stat:
@@ -115,55 +136,6 @@
 #  changed_when: false
 #  register: logrotate_file
 #
-#- name: "change log permissions"
-#  ansible.builtin.lineinfile:
-#    path: /etc/logrotate.conf
-#    regexp: "^create"
-#    line: "create 0600"
-#    state: present
-#  when: logrotate_file.stat.exists
-#
-###############
-#- name: "Check for btmp"
-#  ansible.builtin.stat:
-#    path: /etc/logrotate.d/btmp
-#  changed_when: false
-#  register: btmp_file
-#
-#- name: "change log permissions"
-#  ansible.builtin.replace:
-#    path: /etc/logrotate.d/btmp
-#    regexp: '(\s+)0660(\s+.*)?$'
-#    replace: '\g<1>0600\2'
-#  when: btmp_file.stat.exists
-#
-###############
-#- name: "Check for alternatives"
-#  ansible.builtin.stat:
-#    path: /etc/logrotate.d/alternatives
-#  changed_when: false
-#  register: alternatives_file
-#
-#- name: "change log permissions"
-#  ansible.builtin.replace:
-#    path: "/etc/logrotate.d/alternatives"
-#    regexp: '(\s+)644(\s+.*)?$'
-#    replace: '\g<1>0600\2'
-#  when: alternatives_file.stat.exists
-#
-###############
-#- name: "Check for alternatives"
-#  ansible.builtin.stat:
-#    path: /etc/logrotate.d/wtmp
-#  changed_when: false
-#  register: alternatives_file
-#
-#- name: "change log permissions"
-#  ansible.builtin.replace:
-#    path: /etc/logrotate.d/wtmp
-#    regexp: '(\s+)0664(\s+.*)?$'
-#    replace: '\g<1>0600\2'
-
 ##############
 #- name: Ensure group "sugroup" exists
 #  ansible.builtin.group:
@@ -176,40 +148,3 @@
 #    regexp: '^auth required pam_wheel.so use_uid group=sugroup'
 #    line: auth required pam_wheel.so use_uid group=sugroup
 #    insertafter: "^auth       sufficient pam_rootok.so"
-
-- name: "Replace issue content"
-  ansible.builtin.copy:
-    content: "{{ extra_sec_issue_content }}"
-    dest: "{{ item }}"
-    mode: "0600"
-  with_items:
-    - /etc/issue
-    - /etc/issue.net
-  when: extra_sec_issue_update | bool
-
-- name: "Change log permissions"
-  ansible.builtin.command: find /var/log -type f -exec chmod g-wx,o-rwx '{}' + -o -type d -exec chmod g-w,o-rwx '{}' +
-  changed_when: false
-  failed_when: false
-  when: extra_sec_logs_perms | bool
-
-#- name: 1/2 Add options in /etc/security/pwquality.conf
-#  ansible.builtin.lineinfile:
-#    path: /etc/security/pwquality.conf
-#    regexp: '^# minlen'
-#    line: minlen = 14
-#
-#- name: 2/2 Add options in /etc/security/pwquality.conf
-#  ansible.builtin.lineinfile:
-#    path: /etc/security/pwquality.conf
-#    regexp: '^# minclass'
-#    line: minclass = 4
-
-#delete specific user
-
-- name: "Change umask in /etc/init.d/rc"
-  ansible.builtin.lineinfile:
-    path: /etc/init.d/rc
-    regexp: '^umask 022'
-    line: umask 027
-  when: extra_sec_umask_rc | bool
