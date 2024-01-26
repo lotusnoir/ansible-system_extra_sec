@@ -31,6 +31,18 @@
     - /etc/cron.allow
   when: extra_sec_crontab_allow | bool
 
+- name: "Create at.allow if not exists"
+  ansible.builtin.copy:
+    content: "{{ extra_sec_at_allow_content }}"
+    dest: "{{ item }}"
+    force: 'no'
+    owner: root
+    group: root
+    mode: "600"
+  with_items:
+    - /etc/at.allow
+  when: extra_sec_at_allow | bool
+
 - name: "Replace issue content"
   ansible.builtin.copy:
     content: "{{ extra_sec_issue_content }}"
