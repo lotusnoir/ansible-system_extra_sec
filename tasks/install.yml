@@ -66,6 +66,14 @@
     line: umask 027
   when: extra_sec_umask_rc | bool
 
+#- name: "Change permissions on files"
+#  ansible.builtin.file:
+#    path: "/etc/netplan/99-netcfg-vmware.yaml"
+#    owner: root
+#    group: root
+#    mode: "0600"
+#  when: ansible_distribution == 'Ubuntu'
+
 ###
 # Failed to determine supported controllers: No such process
 # Failed to allocate manager object: No such process
