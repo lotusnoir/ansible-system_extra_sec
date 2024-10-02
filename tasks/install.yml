@@ -25,7 +25,7 @@
     dest: "{{ item }}"
     force: 'no'
     owner: root
-    group: crontab
+    group: "{{ 'crontab' if ansible_os_family == 'Debian' else 'root' }}"
     mode: "640"
   with_items:
     - /etc/cron.allow
