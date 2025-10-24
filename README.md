@@ -22,6 +22,7 @@
 ## Description
 
 Configures extra sec CIS recommandation not supported by other modules
+
 ## Requirements
 
 none
@@ -39,7 +40,6 @@ See [variables](/defaults/main.yml) for more details.
           gather_facts: true
           roles:
             - role: ansible-system_extra_sec
-
 
 ## License
 

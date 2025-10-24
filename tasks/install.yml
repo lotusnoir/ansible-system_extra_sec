@@ -65,6 +65,16 @@
     regexp: "^umask 022"
     line: umask 027
   when: extra_sec_umask_rc | bool
+
+- name: Désactiver les consoles TTY 2 à 6
+  ansible.builtin.systemd:
+    name: "getty@tty{{ item }}.service"
+    enabled: false
+    masked: true
+    state: stopped
+  loop: [2, 3, 4, 5, 6]
+
+
 ###
 # Failed to determine supported controllers: No such process
 # Failed to allocate manager object: No such process
